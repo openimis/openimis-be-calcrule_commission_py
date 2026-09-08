@@ -15,6 +15,7 @@ from core import datetime
 from core.models import User, Officer
 from invoice.services import BillService
 from policy.models import Policy
+from claim_batch.services import get_products_from_work_data
 from product.models import Product
 
 
@@ -140,8 +141,15 @@ class CommissionCalculationRule(AbsStrategy):
         context = kwargs.get('context', None)
         audit_user_id, product_id, start_date, end_date, batch_run, work_data = \
             cls._get_batch_run_parameters(**kwargs)
-        work_data = kwargs.get('work_data', None)
+        if not work_data:
+            work_data = kwargs.get('work_data', None)
         if work_data:
+            # Adapt work data to use products list (support for multi-product batches
+            # instead of location_id). The trigger scopes this per payment_plan.
+            products = get_products_from_work_data(work_data)
+            # Prefer this payment plan's own benefit_plan (the product) for this context.
+            product = getattr(instance, 'benefit_plan', None) or (products[0] if products else None)
+
             # if this is trigerred by batch_run - take user data from audit_user_id
             user = User.objects.filter(i_user__id=audit_user_id).first()
             if user is None:
