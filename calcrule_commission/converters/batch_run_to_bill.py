@@ -70,7 +70,7 @@ class BatchRunToBillConverter(object):
         if pp_params:
             pp_params = pp_params["calculation_rule"] if "calculation_rule" in pp_params else None
         commission_rate = 0
-        if "commission_rate" in pp_params:
+        if pp_params and "commission_rate" in pp_params:
             commission_rate = int(pp_params["commission_rate"])
         bill["terms"] = f'{payment_plan.benefit_plan.name}, {commission_rate}'
 

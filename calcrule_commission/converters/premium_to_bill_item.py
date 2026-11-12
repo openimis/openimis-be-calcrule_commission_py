@@ -1,5 +1,3 @@
-import json
-
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -56,15 +54,10 @@ class PremiumToBillItemConverter(object):
 
     @classmethod
     def build_discount(cls, bill_line_item, payment_plan):
-        pp_params = payment_plan.json_ext
-        if isinstance(pp_params, str):
-            pp_params = json.loads(pp_params)
-        if pp_params:
-            pp_params = pp_params["calculation_rule"] if "calculation_rule" in pp_params else None
-        commision_rate = 0
-        if "commision_rate" in pp_params:
-            commision_rate = float(pp_params["commision_rate"])
-        bill_line_item["discount"] = 1-(commision_rate/100) if commision_rate != 0 else 0
+        # The unit price is already the commission (premium amount x commission_rate),
+        # and the invoice module subtracts `discount` as an amount, not a ratio.
+        # A rate-based discount here would be deducted a second time.
+        bill_line_item["discount"] = 0
 
     @classmethod
     def build_tax(cls, bill_line_item):

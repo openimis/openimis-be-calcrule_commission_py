@@ -129,7 +129,7 @@ class CommissionCalculationRule(AbsStrategy):
             if pp_params:
                 pp_params = pp_params["calculation_rule"] if "calculation_rule" in pp_params else None
             commission_rate = 0
-            if "commission_rate" in pp_params:
+            if pp_params and "commission_rate" in pp_params:
                 commission_rate = float(pp_params["commission_rate"])
             return float(instance.amount) * (commission_rate / 100)
         else:
